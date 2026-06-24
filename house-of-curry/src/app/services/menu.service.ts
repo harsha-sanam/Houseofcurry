@@ -15,7 +15,7 @@ export class MenuService {
     return {
       date: formatted,
       title: "Today's Menu",
-      deliveryLocations: ['901', '47300', '45500'],
+      deliveryLocations: ['901 Page', '47300', '45500'],
       zellePhone: '571-722-2640',
       items: [
         {

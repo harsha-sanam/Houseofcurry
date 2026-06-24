@@ -29,7 +29,6 @@ export class OrderPageComponent implements OnInit {
   customer = signal<CustomerInfo>({ name: '', phone: '', location: '' });
   selectedComboId = signal<string | null>(null);
   orderSubmitted = signal(false);
-  showCheckout = signal(false);
 
   readonly canSubmit = computed(() => {
     const info = this.customer();
@@ -78,30 +77,17 @@ export class OrderPageComponent implements OnInit {
     return this.cartService.getQuantity(itemId);
   }
 
-  openCheckout(): void {
-    if (this.itemCount() > 0) {
-      this.showCheckout.set(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
-  closeCheckout(): void {
-    this.showCheckout.set(false);
-  }
-
   submitOrder(): void {
     if (!this.canSubmit()) {
       return;
     }
     this.orderSubmitted.set(true);
-    this.showCheckout.set(false);
   }
 
   startNewOrder(): void {
     this.cartService.clear();
     this.selectedComboId.set(null);
     this.orderSubmitted.set(false);
-    this.showCheckout.set(false);
   }
 
   copyOrder(): void {

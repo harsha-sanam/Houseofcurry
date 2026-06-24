@@ -10,7 +10,7 @@
     </div>
     <div class="header__meta">
       <span class="badge">{{ menu.date }}</span>
-      <span class="badge badge--green">Delivery: {{ menu.deliveryLocations.join(' · ') }}</span>
+      <!-- <span class="badge badge--green">Delivery: {{ menu.deliveryLocations.join(' · ') }}</span> -->
     </div>
   </header>
 
@@ -149,13 +149,20 @@
       </div>
     </section>
 
-    @if (showCheckout()) {
-      <section class="card checkout-card">
-        <div class="section-head">
+    <section class="card checkout-card">
+      <div class="section-head">
+        <div>
           <h2>Review & pay</h2>
-          <button type="button" class="btn btn--ghost btn--small" (click)="closeCheckout()">Back</button>
+          <p class="hint">Your order updates as you add items</p>
         </div>
+        @if (itemCount() > 0) {
+          <span class="badge badge--count">{{ itemCount() }} item{{ itemCount() === 1 ? '' : 's' }}</span>
+        }
+      </div>
 
+      @if (itemCount() === 0) {
+        <p class="checkout-empty">Add a combo or extra item to get started.</p>
+      } @else {
         <ul class="checkout-list">
           @for (line of cartLines(); track line.item.id) {
             <li>
@@ -164,49 +171,41 @@
             </li>
           }
         </ul>
+      }
 
-        <div class="checkout-total">
-          <span>Total</span>
-          <strong>${{ total() }}</strong>
-        </div>
-
-        <div class="payment-section">
-          <p class="payment-label">Pay with</p>
-          <div class="payment-buttons">
-            <button type="button" class="pay-btn" (click)="onPaymentTap('apple')">
-              <img src="assets/apple-pay.svg" alt="Apple Pay" />
-            </button>
-            <button type="button" class="pay-btn" (click)="onPaymentTap('google')">
-              <img src="assets/google-pay.svg" alt="Google Pay" />
-            </button>
-            <button type="button" class="pay-btn pay-btn--zelle" (click)="onPaymentTap('zelle')">
-              <span class="zelle-icon">Z</span>
-              <span>Zelle · {{ menu.zellePhone }}</span>
-            </button>
-          </div>
-          <p class="payment-note">Apple Pay & Google Pay are placeholders. Zelle is active today.</p>
-        </div>
-
-        <button
-          type="button"
-          class="btn btn--primary btn--full"
-          [disabled]="!canSubmit()"
-          (click)="submitOrder()"
-        >
-          Confirm order
-        </button>
-      </section>
-    }
-  }
-
-  @if (!orderSubmitted() && itemCount() > 0 && !showCheckout()) {
-    <footer class="cart-bar">
-      <div class="cart-bar__info">
-        <span class="cart-bar__count">{{ itemCount() }} item{{ itemCount() === 1 ? '' : 's' }}</span>
-        <span class="cart-bar__total">${{ total() }}</span>
+      <div class="checkout-total">
+        <span>Total</span>
+        <strong>${{ total() }}</strong>
       </div>
-      <button type="button" class="btn btn--primary" (click)="openCheckout()">Checkout</button>
-    </footer>
+
+      <div class="payment-section">
+        <p class="payment-label">Pay with</p>
+        <div class="payment-buttons">
+          <button type="button" class="pay-btn" aria-label="Apple Pay" (click)="onPaymentTap('apple')">
+            <img src="assets/apple-pay.png" alt="Apple Pay" />
+          </button>
+          <button type="button" class="pay-btn" aria-label="Google Pay" (click)="onPaymentTap('google')">
+            <img src="assets/google-pay.png" alt="Google Pay" />
+          </button>
+          <button type="button" class="pay-btn pay-btn--zelle" aria-label="Zelle" (click)="onPaymentTap('zelle')">
+            <svg class="zelle-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zelle">
+              <circle cx="50" cy="50" r="45" fill="#6d1ed4" />
+              <text x="50" y="56" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="800" font-size="48" fill="#ffffff">Z</text>
+            </svg>
+          </button>
+        </div>
+        <p class="payment-note">Apple Pay & Google Pay are placeholders. Zelle is active today.</p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn--primary btn--full"
+        [disabled]="!canSubmit()"
+        (click)="submitOrder()"
+      >
+        Confirm order
+      </button>
+    </section>
   }
 
   <footer class="site-footer">

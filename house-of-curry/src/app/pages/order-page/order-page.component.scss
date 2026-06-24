@@ -5,29 +5,29 @@
 .page {
   max-width: 720px;
   margin: 0 auto;
-  padding: 1rem 1rem 6rem;
+  padding: 1rem 1rem 2rem;
 }
 
 .header {
   background: linear-gradient(135deg, var(--hoc-green) 0%, #1a5c38 100%);
   color: #fff;
   border-radius: 20px;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
+  padding: 0.9rem 0.9rem;
+  margin-bottom: 0.75rem;
   box-shadow: 0 8px 24px rgba(45, 106, 69, 0.25);
 }
 
 .header__brand {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
 }
 
 .header__logo {
-  width: 88px;
-  height: 88px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  border: 3px solid #fff;
+  border: 2px solid #fff;
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -41,9 +41,9 @@
 }
 
 .header__title {
-  margin: 0.15rem 0;
+  margin: 0.08rem 0;
   font-family: var(--font-display);
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   line-height: 1.1;
   color: #fff;
 }
@@ -58,7 +58,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .badge {
@@ -74,6 +74,13 @@
   background: rgba(255, 255, 255, 0.95);
   color: var(--hoc-green);
   border-color: transparent;
+}
+
+.badge--count {
+  background: #fff4ec;
+  color: var(--hoc-orange);
+  border-color: rgba(232, 93, 4, 0.2);
+  flex-shrink: 0;
 }
 
 .card {
@@ -146,15 +153,15 @@ select:focus {
 .combo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .combo-card {
-  border: 2px solid #eee;
-  border-radius: 14px;
-  padding: 1rem;
+  border: 1.5px solid #f1f3f5;
+  border-radius: 12px;
+  padding: 0.75rem;
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
   background: #fff;
 }
 
@@ -180,28 +187,28 @@ select:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .combo-card h3 {
-  margin: 0 0 0.65rem;
-  font-size: 1.05rem;
+  margin: 0 0 0.45rem;
+  font-size: 0.98rem;
 }
 
 .includes-list {
-  margin: 0 0 0.85rem;
-  padding-left: 1.1rem;
+  margin: 0 0 0.6rem;
+  padding-left: 1rem;
   color: var(--hoc-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
 .diet-tag {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  padding: 0.2rem 0.55rem;
-  font-size: 0.72rem;
+  padding: 0.14rem 0.45rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -220,12 +227,12 @@ select:focus {
 
 .price {
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--hoc-red);
 }
 
 .qty-row {
-  margin-top: auto;
+  margin-top: 0.5rem;
 }
 
 .item-list {
@@ -273,33 +280,7 @@ select:focus {
   flex-shrink: 0;
 }
 
-.stepper {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #f3f4f6;
-  border-radius: 999px;
-  padding: 0.2rem;
-}
-
-.stepper button {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 50%;
-  background: #fff;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--hoc-dark);
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.stepper span {
-  min-width: 1.25rem;
-  text-align: center;
-  font-weight: 700;
-}
+/* stepper styles defined later (refined) - duplicate removed */
 
 .btn {
   border: none;
@@ -347,45 +328,30 @@ select:focus {
   border: 1.5px solid var(--hoc-green);
 }
 
-.btn--full {
-  width: 100%;
-  margin-top: 1rem;
-  padding: 0.9rem;
-  font-size: 1rem;
-}
-
-.cart-bar {
-  position: fixed;
-  left: 50%;
-  bottom: 1rem;
-  transform: translateX(-50%);
-  width: calc(100% - 2rem);
-  max-width: 688px;
-  background: #fff;
-  border-radius: 16px;
-  padding: 0.85rem 1rem;
-  display: flex;
-  justify-content: space-between;
+.stepper {
+  display: inline-flex;
   align-items: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  z-index: 100;
+  gap: 0.35rem;
+  background: #f7f8f9;
+  border-radius: 999px;
+  padding: 0.15rem;
 }
-
-.cart-bar__info {
-  display: flex;
-  flex-direction: column;
-}
-
-.cart-bar__count {
-  font-size: 0.82rem;
-  color: var(--hoc-muted);
-}
-
-.cart-bar__total {
-  font-size: 1.25rem;
-  font-weight: 800;
+.stepper button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--hoc-dark);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+.stepper span {
+  min-width: 1.1rem;
+  text-align: center;
+  font-weight: 700;
 }
 
 .checkout-list {
@@ -425,23 +391,25 @@ select:focus {
 
 .payment-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .pay-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  min-height: 48px;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
-  background: #fff;
+  gap: 0.25rem;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border: 1px solid #eef2f5;
+  border-radius: 8px;
+  background: transparent;
   cursor: pointer;
-  padding: 0.35rem 0.75rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  padding: 6px;
+  transition: border-color 0.12s, box-shadow 0.12s;
 }
 
 .pay-btn:hover {
@@ -450,18 +418,36 @@ select:focus {
 }
 
 .pay-btn img {
-  height: 36px;
+  height: 40px;
   width: auto;
 }
 
-.pay-btn--zelle {
-  background: #6d1ed4;
-  border-color: #6d1ed4;
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.95rem;
+.zelle-svg {
+  width: 48px;
+  height: 48px;
 }
 
+.pay-btn img {
+  height: 22px;
+  width: auto;
+}
+
+.zelle-svg {
+  width: 32px;
+  height: 32px;
+}
+
+.pay-btn--zelle {
+  border-color: #e9e3fb;
+}
+
+.pay-btn--zelle .zelle-svg circle {
+  fill: #6d1ed4;
+}
+
+.pay-btn--zelle .zelle-svg text {
+  fill: #ffffff;
+}
 .zelle-icon {
   display: inline-flex;
   align-items: center;
@@ -531,8 +517,10 @@ select:focus {
   }
 
   .header__brand {
-    flex-direction: column;
-    text-align: center;
+    flex-direction: row;
+    text-align: left;
+    gap: 0.6rem;
+    align-items: center;
   }
 
   .item-row {

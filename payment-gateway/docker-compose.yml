@@ -1,0 +1,55 @@
+services:
+  mysql:
+    image: mysql:8.1
+    container_name: payment-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-Password123!}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-paymentgateway}
+      - MYSQL_USER=${MYSQL_USER:-paymentuser}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-paymentpass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - payment-net
+
+  payment-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    image: payment-api:latest
+    container_name: payment-api
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-paymentgateway}
+      - MYSQL_USER=${MYSQL_USER:-paymentuser}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-paymentpass}
+      - SQUARE_ACCESS_TOKEN
+      - SQUARE_APPLICATION_ID
+      - SQUARE_LOCATION_ID
+      - SQUARE_ENVIRONMENT
+    ports:
+      - "5001:5000"
+    networks:
+      - payment-net
+
+volumes:
+  mysql-data:
+    driver: local
+
+networks:
+  payment-net:
+    driver: bridge

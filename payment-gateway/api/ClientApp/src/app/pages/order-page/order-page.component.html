@@ -1,0 +1,215 @@
+<div class="page">
+  <header class="header">
+    <div class="header__brand">
+      <img src="assets/logo.png" alt="House of Curry logo" class="header__logo" />
+      <div>
+        <p class="header__eyebrow">Welcome to</p>
+        <h1 class="header__title">House of Curry</h1>
+        <p class="header__subtitle">Fresh homestyle lunch, delivered daily</p>
+      </div>
+    </div>
+    <div class="header__meta">
+      <span class="badge">{{ menu.date }}</span>
+      <!-- <span class="badge badge--green">Delivery: {{ menu.deliveryLocations.join(' · ') }}</span> -->
+    </div>
+  </header>
+
+  @if (orderSubmitted()) {
+    <section class="card success-card">
+      <div class="success-card__icon">✓</div>
+      <h2>Order ready to send!</h2>
+      <p>Copy the message below and send it via DM, or pay with Zelle.</p>
+      <pre class="order-preview">{{ orderSummary() }}</pre>
+      <div class="success-actions">
+        <button type="button" class="btn btn--primary" (click)="copyOrder()">Copy order message</button>
+        <button type="button" class="btn btn--ghost" (click)="startNewOrder()">Place another order</button>
+      </div>
+    </section>
+  } @else {
+    <section class="card customer-card">
+      <h2>Your details</h2>
+      <p class="hint">Saved on this device for tomorrow's order.</p>
+      <div class="form-grid">
+        <label>
+          Name
+          <input
+            type="text"
+            placeholder="Your name"
+            [ngModel]="customer().name"
+            (ngModelChange)="updateCustomer('name', $event)"
+          />
+        </label>
+        <label>
+          Phone
+          <input
+            type="tel"
+            placeholder="571-555-1234"
+            [ngModel]="customer().phone"
+            (ngModelChange)="updateCustomer('phone', $event)"
+          />
+        </label>
+        <label class="full-width">
+          Delivery location
+          <select
+            [ngModel]="customer().location"
+            (ngModelChange)="updateCustomer('location', $event)"
+          >
+            <option value="">Select building</option>
+            @for (loc of menu.deliveryLocations; track loc) {
+              <option [value]="loc">{{ loc }}</option>
+            }
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h2>Pick your combo</h2>
+          <p class="hint">One tap to add — includes rice, dal, chapati & dessert</p>
+        </div>
+      </div>
+
+      <div class="combo-grid">
+        @for (combo of combos; track combo.id) {
+          <article
+            class="combo-card"
+            [class.combo-card--selected]="selectedComboId() === combo.id"
+            [class.combo-card--veg]="combo.diet === 'veg'"
+            [class.combo-card--nonveg]="combo.diet === 'non-veg'"
+            (click)="selectCombo(combo)"
+          >
+            <div class="combo-card__top">
+              <span class="diet-tag" [class.diet-tag--veg]="combo.diet === 'veg'">
+                {{ combo.diet === 'veg' ? 'Veg' : 'Non-Veg' }}
+              </span>
+              <span class="price">${{ combo.price }}</span>
+            </div>
+            <h3>{{ combo.name }}</h3>
+            <ul class="includes-list">
+              @for (item of combo.includes; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+            <div class="qty-row" (click)="$event.stopPropagation()">
+              @if (getQuantity(combo.id) === 0) {
+                <button type="button" class="btn btn--add" (click)="addToCart(combo)">
+                  Add combo
+                </button>
+              } @else {
+                <div class="stepper">
+                  <button type="button" aria-label="Remove" (click)="removeFromCart(combo.id)">−</button>
+                  <span>{{ getQuantity(combo.id) }}</span>
+                  <button type="button" aria-label="Add" (click)="addToCart(combo)">+</button>
+                </div>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h2>Add extra items</h2>
+          <p class="hint">Mix and match with your combo</p>
+        </div>
+      </div>
+
+      <div class="item-list">
+        @for (item of addOns; track item.id) {
+          <div class="item-row">
+            <div class="item-row__info">
+              <div class="item-row__title">
+                <h3>{{ item.name }}</h3>
+                <span class="diet-tag diet-tag--small" [class.diet-tag--veg]="item.diet === 'veg'">
+                  {{ item.diet === 'veg' ? 'Veg' : 'Non-Veg' }}
+                </span>
+              </div>
+              @if (item.description) {
+                <p class="item-row__desc">{{ item.description }}</p>
+              }
+            </div>
+            <div class="item-row__action">
+              <span class="price">${{ item.price }}</span>
+              @if (getQuantity(item.id) === 0) {
+                <button type="button" class="btn btn--add btn--small" (click)="addToCart(item)">Add</button>
+              } @else {
+                <div class="stepper">
+                  <button type="button" aria-label="Remove" (click)="removeFromCart(item.id)">−</button>
+                  <span>{{ getQuantity(item.id) }}</span>
+                  <button type="button" aria-label="Add" (click)="addToCart(item)">+</button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="card checkout-card">
+      <div class="section-head">
+        <div>
+          <h2>Review & pay</h2>
+          <p class="hint">Your order updates as you add items</p>
+        </div>
+        @if (itemCount() > 0) {
+          <span class="badge badge--count">{{ itemCount() }} item{{ itemCount() === 1 ? '' : 's' }}</span>
+        }
+      </div>
+
+      @if (itemCount() === 0) {
+        <p class="checkout-empty">Add a combo or extra item to get started.</p>
+      } @else {
+        <ul class="checkout-list">
+          @for (line of cartLines(); track line.item.id) {
+            <li>
+              <span>{{ line.quantity }}× {{ line.item.name }}</span>
+              <strong>${{ line.item.price * line.quantity }}</strong>
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="checkout-total">
+        <span>Total</span>
+        <strong>${{ total() }}</strong>
+      </div>
+
+      <div class="payment-section">
+        <p class="payment-label">Pay with</p>
+        <div class="payment-buttons">
+          <button type="button" class="pay-btn" aria-label="Apple Pay" (click)="onPaymentTap('apple')">
+            <img src="assets/apple-pay.png" alt="Apple Pay" />
+          </button>
+          <button type="button" class="pay-btn" aria-label="Google Pay" (click)="onPaymentTap('google')">
+            <img src="assets/google-pay.png" alt="Google Pay" />
+          </button>
+          <button type="button" class="pay-btn pay-btn--zelle" aria-label="Zelle" (click)="onPaymentTap('zelle')">
+            <svg class="zelle-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zelle">
+              <circle cx="50" cy="50" r="45" fill="#6d1ed4" />
+              <text x="50" y="56" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="800" font-size="48" fill="#ffffff">Z</text>
+            </svg>
+          </button>
+        </div>
+        <p class="payment-note">Apple Pay & Google Pay are placeholders. Zelle is active today.</p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn--primary btn--full"
+        [disabled]="!canSubmit()"
+        (click)="submitOrder()"
+      >
+        Confirm order
+      </button>
+    </section>
+  }
+
+  <footer class="site-footer">
+    <p>41200 Blacow Road, #K, Fremont, CA 94538</p>
+    <p>Houseofcurrys.ca&#64;gmail.com · {{ menu.zellePhone }}</p>
+  </footer>
+</div>

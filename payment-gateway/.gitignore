@@ -1,0 +1,14 @@
+# .NET build output
+api/bin/
+api/obj/
+
+# Node dependencies and Angular build output
+api/ClientApp/node_modules/
+api/ClientApp/dist/
+
+# MySQL local data
+mysql-data/
+
+# general
+.DS_Store
+.env

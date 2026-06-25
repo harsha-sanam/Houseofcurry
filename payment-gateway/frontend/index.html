@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>House of Curry — Quick Checkout</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin: 0; background: #fff7f1; color: #0f172a; }
+    .wrap { max-width: 920px; margin: 2rem auto; padding: 1rem; }
+    .card { background: #fff; border-radius: 12px; padding: 1rem; box-shadow: 0 6px 30px rgba(16,24,40,0.06); }
+    .items { display:flex; gap: 0.75rem; flex-wrap:wrap; margin: 1rem 0 }
+    .item { flex: 1 1 220px; border-radius: 10px; padding: 0.75rem; background: #fcfcfd; border: 1px solid #f1f5f9 }
+    .item h3 { margin: 0 0 0.5rem; font-size: 1rem }
+    .btn { display:inline-block; padding:0.6rem 0.9rem; border-radius:8px; background:#166534; color:#fff; text-decoration:none }
+    .pay-row { display:flex; gap: 0.5rem; align-items:center; margin-top:1rem }
+    .pay-btn { width:56px; height:56px; display:flex; justify-content:center; align-items:center; border-radius:10px; background:#fff; border:1px solid #e6eef4; cursor:pointer }
+    #messages { margin-top:0.75rem; color:#374151 }
+  </style>
+  <script src="https://web.squarecdn.com/v1/square.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>House of Curry — Quick Checkout</h1>
+      <p>Tap a pay button to complete checkout using Apple Pay or Google Pay (via Square Web Payments SDK).</p>
+
+      <div class="items" id="items">
+        <div class="item">
+          <h3>Veg Combo</h3>
+          <div>$11</div>
+          <a class="btn" href="#" onclick="addToCart('Veg Combo',1100);return false;">Add</a>
+        </div>
+        <div class="item">
+          <h3>Non-Veg Combo</h3>
+          <div>$13</div>
+          <a class="btn" href="#" onclick="addToCart('Non-Veg Combo',1300);return false;">Add</a>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong id="cartLabel">No items</strong>
+            <div id="cartSub">—</div>
+          </div>
+        </div>
+
+        <div class="pay-row">
+          <div id="apple-pay-button" class="pay-btn" title="Apple Pay" style="display:none">A</div>
+          <div id="google-pay-button" class="pay-btn" title="Google Pay" style="display:none">G</div>
+          <div id="fallback-pay" style="margin-left:auto">
+            <button id="checkout-btn" class="btn">Checkout</button>
+          </div>
+        </div>
+
+        <div id="messages"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  const messages = (msg) => { document.getElementById('messages').textContent = msg; };
+
+  let cart = {name: null, amount: 0};
+  window.addToCart = (name, amountCents) => { cart = {name, amount: amountCents}; document.getElementById('cartLabel').textContent = name; document.getElementById('cartSub').textContent = `$${(amountCents/100).toFixed(2)}` };
+
+  // load config from backend (app id + optional location)
+  const cfgResp = await fetch('/api/SquarePayment/config');
+  const cfg = cfgResp.ok ? await cfgResp.json() : { applicationId: '', locationId: '' };
+
+  if (!cfg.applicationId) {
+    messages('Missing Square application ID on server; set SQUARE_APPLICATION_ID in env.');
+    return;
+  }
+
+  // Initialize Square payments SDK
+  let payments;
+  try {
+    payments = window.Square.payments(cfg.applicationId, cfg.locationId || undefined);
+  } catch (e) {
+    console.error(e);
+    messages('Square Payments SDK failed to initialize.');
+    return;
+  }
+
+  // Build paymentRequest for wallet buttons
+  const paymentRequest = payments.paymentRequest({
+    countryCode: 'US',
+    currencyCode: 'USD',
+    total: { amount: '0.00', label: 'House of Curry' },
+    requestBillingContact: true
+  });
+
+  // Detect Apple Pay support
+  try {
+    if (window.ApplePaySession && await paymentRequest.canMakePayment()) {
+      document.getElementById('apple-pay-button').style.display = 'flex';
+      document.getElementById('apple-pay-button').addEventListener('click', async () => {
+        if (!cart.amount) { messages('Add an item first'); return; }
+        // update total
+        paymentRequest.update({ total: { amount: (cart.amount/100).toFixed(2), label: cart.name } });
+        const wallet = await payments.wallet(paymentRequest);
+        const result = await wallet.tokenize();
+        if (result.status === 'OK') {
+          messages('Payment authorized, processing...');
+          await postToken(result.token);
+        } else {
+          messages('Payment failed: ' + JSON.stringify(result));
+        }
+      });
+      messages('Apple Pay available');
+    } else if (await paymentRequest.canMakePayment({ supportedMethods: ['https://google.com/pay'] })) {
+      document.getElementById('google-pay-button').style.display = 'flex';
+      document.getElementById('google-pay-button').addEventListener('click', async () => {
+        if (!cart.amount) { messages('Add an item first'); return; }
+        paymentRequest.update({ total: { amount: (cart.amount/100).toFixed(2), label: cart.name } });
+        const wallet = await payments.wallet(paymentRequest);
+        const result = await wallet.tokenize();
+        if (result.status === 'OK') {
+          messages('Payment authorized, processing...');
+          await postToken(result.token);
+        } else {
+          messages('Payment failed: ' + JSON.stringify(result));
+        }
+      });
+      messages('Google Pay available');
+    } else {
+      messages('No native wallets available. Use checkout button.');
+      document.getElementById('checkout-btn').addEventListener('click', async () => {
+        if (!cart.amount) { messages('Add an item first'); return; }
+        // fallback: prompt user for name/phone and simulate tokenization (for demo only)
+        const name = prompt('Name');
+        const phone = prompt('Phone');
+        messages('Processing fallback order...');
+        await fetch('/api/SquarePayment/process-order', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ SourceId: 'CASH_FALLBACK', AmountCents: cart.amount, Currency: 'USD', CustomerName: name, Phone: phone, Note: 'Fallback checkout' })
+        }).then(r=>r.json()).then(j=>messages(JSON.stringify(j))).catch(e=>messages('Error: '+e.message));
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    messages('Error checking wallet availability.');
+  }
+
+  async function postToken(token) {
+    try {
+      const resp = await fetch('/api/SquarePayment/process-order', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ SourceId: token, AmountCents: cart.amount, Currency: 'USD', CustomerName: '', Phone: '', Note: cart.name })
+      });
+      const body = await resp.json();
+      if (!resp.ok) throw new Error(JSON.stringify(body));
+      messages('Payment processed: ' + JSON.stringify(body));
+    } catch (e) {
+      messages('Payment error: ' + e.message);
+    }
+  }
+
+})();
+</script>
+</body>
+</html>
